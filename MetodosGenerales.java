@@ -1,5 +1,6 @@
 package segundoparcial;
 
+    import java.util.LinkedList;
     import java.util.Queue;
     import java.util.Scanner;
     import java.util.Stack;
@@ -39,12 +40,38 @@ package segundoparcial;
                 System.out.println("No hay computadores disponibles.");
                 return;
             }
-            objcomputador pc = pila.pop();
-            System.out.print("Ingrese el nombre del usuario: ");
-            pc.setNombreUsuario(sc.nextLine());
-            pc.setDisponible(false);
-            System.out.println("Computador prestado a " + pc.getNombreUsuario());
-            pila.push(pc);
+            
+            System.out.println("Lista de computadores disponibles:");
+            for (objcomputador pc : pila) {
+                if (pc.isDisponible()) {
+                    System.out.println("Serial: " + pc.getSerial() + " - Marca: " + pc.getMarca());
+                }
+            }
+            
+            System.out.print("Ingrese el serial del computador a prestar: ");
+            String serialBuscado = sc.nextLine();
+            
+            Stack<objcomputador> aux = new Stack<>();
+            boolean encontrado = false;
+            while (!pila.isEmpty()) {
+                objcomputador pc = pila.pop();
+                if (pc.getSerial().equalsIgnoreCase(serialBuscado) && pc.isDisponible()) {
+                    System.out.print("Ingrese el nombre del usuario: ");
+                    pc.setNombreUsuario(sc.nextLine());
+                    pc.setDisponible(false);
+                    System.out.println("Computador prestado a " + pc.getNombreUsuario());
+                    encontrado = true;
+                }
+                aux.push(pc);
+            }
+            
+            while (!aux.isEmpty()) {
+                pila.push(aux.pop());
+            }
+            
+            if (!encontrado) {
+                System.out.println("No se encontró un computador disponible con ese serial.");
+            }
         }
         
         public void prestarTablet(Scanner sc, Queue<objtablet> cola) {
@@ -52,37 +79,129 @@ package segundoparcial;
                 System.out.println("No hay tablets disponibles.");
                 return;
             }
-            objtablet tablet = cola.poll();
-            System.out.print("Ingrese el nombre del usuario: ");
-            tablet.setNombreUsuario(sc.nextLine());
-            tablet.setDisponible(false);
-            System.out.println("Tablet prestada a " + tablet.getNombreUsuario());
-            cola.add(tablet);
-        }
-        
-        public void devolverComputador(Scanner sc, Stack<objcomputador> pila) {
-            if (pila.isEmpty()) {
-                System.out.println("No hay computadores prestados.");
-                return;
+            
+            System.out.println("Lista de tablets disponibles:");
+            for (objtablet tablet : cola) {
+                if (tablet.isDisponible()) {
+                    System.out.println("Serial: " + tablet.getSerial() + " - Marca: " + tablet.getMarca());
+                }
             }
-            objcomputador pc = pila.pop();
-            pc.setNombreUsuario("");
-            pc.setDisponible(true);
-            System.out.println("Computador devuelto correctamente.");
-            pila.push(pc);
-        }
-        
-        public void devolverTablet(Scanner sc, Queue<objtablet> cola) {
-            if (cola.isEmpty()) {
-                System.out.println("No hay tablets prestadas.");
-                return;
+            
+            System.out.print("Ingrese el serial de la tablet a prestar: ");
+            String serialBuscado = sc.nextLine();
+            
+            Queue<objtablet> aux = new java.util.LinkedList<>();
+            boolean encontrada = false;
+            while (!cola.isEmpty()) {
+                objtablet tablet = cola.poll();
+                if (tablet.getSerial().equalsIgnoreCase(serialBuscado) && tablet.isDisponible()) {
+                    System.out.print("Ingrese el nombre del usuario: ");
+                    tablet.setNombreUsuario(sc.nextLine());
+                    tablet.setDisponible(false);
+                    System.out.println("Tablet prestada a " + tablet.getNombreUsuario());
+                    encontrada = true;
+                }
+                aux.add(tablet);
             }
-            objtablet tablet = cola.poll();
-            tablet.setNombreUsuario("");
-            tablet.setDisponible(true);
-            System.out.println("Tablet devuelta correctamente.");
-            cola.add(tablet);
+            
+            while (!aux.isEmpty()) {
+                cola.add(aux.poll());
+            }
+            
+            if (!encontrada) {
+                System.out.println("No se encontró una tablet disponible con ese serial.");
+            }
         }
+    
+    
+        
+       public void devolverTablet(Scanner sc, Queue<objtablet> cola) {
+    if (cola.isEmpty()) {
+        System.out.println("No hay tablets prestadas.");
+        return;
+    }
+
+    System.out.println("Lista de tablets prestadas:");
+    for (objtablet tablet : cola) {
+        if (!tablet.isDisponible()) {
+            System.out.println("Serial: " + tablet.getSerial() + ", Prestada a: " + tablet.getNombreUsuario());
+        }
+    }
+
+    System.out.print("Ingrese el serial de la tablet a devolver: ");
+    String serialBuscado = sc.nextLine();
+
+    Queue<objtablet> tempQueue = new LinkedList<>();
+    objtablet tabletEncontrada = null;
+
+    while (!cola.isEmpty()) {
+        objtablet tablet = cola.poll();
+        if (tablet.getSerial().equalsIgnoreCase(serialBuscado) && !tablet.isDisponible()) {
+            tabletEncontrada = tablet;
+            break;
+        }
+        tempQueue.add(tablet);
+    }
+
+    while (!tempQueue.isEmpty()) {
+        cola.add(tempQueue.poll());
+    }
+
+    if (tabletEncontrada == null) {
+        System.out.println("No se encontró una tablet prestada con ese serial.");
+        return;
+    }
+
+    tabletEncontrada.setNombreUsuario("");
+    tabletEncontrada.setDisponible(true);
+    cola.add(tabletEncontrada);
+    System.out.println("Tablet devuelta correctamente.");
+}
+
+public void devolverComputador(Scanner sc, Stack<objcomputador> pila) {
+    if (pila.isEmpty()) {
+        System.out.println("No hay computadores prestados.");
+        return;
+    }
+
+    System.out.println("Lista de computadores prestados:");
+    for (objcomputador pc : pila) {
+        if (!pc.isDisponible()) {
+            System.out.println("Serial: " + pc.getSerial() + ", Prestado a: " + pc.getNombreUsuario());
+        }
+    }
+
+    System.out.print("Ingrese el serial del computador a devolver: ");
+    String serialBuscado = sc.nextLine();
+
+    Stack<objcomputador> tempStack = new Stack<>();
+    objcomputador pcEncontrado = null;
+
+    while (!pila.isEmpty()) {
+        objcomputador pc = pila.pop();
+        if (pc.getSerial().equalsIgnoreCase(serialBuscado) && !pc.isDisponible()) {
+            pcEncontrado = pc;
+            break;
+        }
+        tempStack.push(pc);
+    }
+
+    while (!tempStack.isEmpty()) {
+        pila.push(tempStack.pop());
+    }
+
+    if (pcEncontrado == null) {
+        System.out.println("No se encontró un computador prestado con ese serial.");
+        return;
+    }
+
+    pcEncontrado.setNombreUsuario("");
+    pcEncontrado.setDisponible(true);
+    pila.push(pcEncontrado);
+    System.out.println("Computador devuelto correctamente.");
+}
+
+        
         
         private double validarDouble(Scanner sc) {
             while (!sc.hasNextDouble()) {
@@ -168,4 +287,6 @@ package segundoparcial;
                 System.out.println("No se encontró una tablet con ese serial.");
             }
         }
+        
+       
     }
